@@ -157,8 +157,21 @@ button{border:0;background:#333;color:white;border-radius:20px;padding:0 25px;cu
   </form>
 </div>
 
-<script src="./index_files/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://vrirjvqozyjswpatshkp.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
+const WEBSITE_VERSION = "V1.3";
 
+if (!window.supabase || !window.supabase.createClient) {
+    throw new Error("Supabase SDK 未加载");
+}
+
+window.supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+</script>
 <style>
 /* 用户反馈：按钮和弹窗统一固定在右下侧 */
 #feedbackPanel {
@@ -785,15 +798,15 @@ async function send() {
         });
 
         // 调用 Supabase Edge Function
-        const { data, error } = await supabaseClient.functions.invoke(
-            "digital-twin",
-            {
-                body: {
-                    messages: history
-                }
+       const { data, error } =
+    await window.supabaseClient.functions.invoke(
+        "digital-twin",
+        {
+            body: {
+                messages: history
             }
-        );
-
+        }
+    );
         if (error) {
             throw error;
         }
@@ -837,197 +850,7 @@ function escapeHtml(text) {
 </script>
 
 
-<!-- Supabase SDK -->
-<script src="./index_files/supabase-js@2"></script>
-
 <script>
-
-// ===== Supabase Feedback =====
-
-const SUPABASE_URL =
-    "https://vrirjvqozyjswpatshkp.supabase.co";
-
-const SUPABASE_ANON_KEY =
-    "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
-
-const WEBSITE_VERSION = "V1.3";
-
-
-if (!window.supabase || !window.supabase.createClient) {
-    throw new Error("Supabase SDK 未加载");
-}
-
-
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
-
-
-async function submitFeedback(event) {
-
-    event.preventDefault();
-
-    const name =
-        document.getElementById("feedbackName").value.trim();
-
-    const content =
-        document.getElementById("feedbackText").value.trim();
-
-    const relationship =
-        document.querySelector(
-            'input[name="relationship"]:checked'
-        )?.value || null;
-
-    const device =
-        document.querySelector(
-            'input[name="device"]:checked'
-        )?.value || null;
-
-    const status =
-        document.getElementById("feedbackStatus");
-
-    const button =
-        document.getElementById("feedbackSubmit");
-
-
-    if (!content) {
-        status.textContent = "请先填写反馈内容。";
-        return;
-    }
-
-    if (!relationship) {
-        status.textContent = "请选择你与主页主人的关系。";
-        return;
-    }
-
-    if (!device) {
-        status.textContent = "请选择本条反馈针对的设备。";
-        return;
-    }
-
-
-    button.disabled = true;
-    status.textContent = "正在提交……";
-
-
-    try {
-
-        const { error } = await supabaseClient
-            .from("visitor_feedback")
-            .insert([
-                {
-                    name: name || null,
-                    relationship: relationship,
-                    device: device,
-                    content: content,
-                    website_version: WEBSITE_VERSION
-                }
-            ]);
-
-
-        if (error) {
-            console.error(
-                "Supabase feedback insert error:",
-                error
-            );
-
-            status.textContent =
-                "提交失败：" +
-                (error.message || "请稍后再试。");
-
-            return;
-        }
-
-
-        document.getElementById("feedbackName").value = "";
-        document.getElementById("feedbackText").value = "";
-
-        document
-            .querySelectorAll(
-                'input[name="relationship"], input[name="device"]'
-            )
-            .forEach(function(input) {
-                input.checked = false;
-            });
-
-        status.textContent =
-            "✓ 感谢你的反馈！已经成功提交。";
-
-
-    } catch (error) {
-
-        console.error(
-            "Feedback Error:",
-            error
-        );
-
-        status.textContent =
-            "提交失败：" +
-            (error.message || "请稍后再试。");
-
-    } finally {
-
-        button.disabled = false;
-
-    }
-}
-
-
-function toggleFeedback() {
-
-    const panel =
-        document.getElementById("feedbackPanel");
-
-    const button =
-        document.getElementById("feedbackToggle");
-
-    if (!panel || !button) {
-        return;
-    }
-
-    const isOpen =
-        panel.style.display !== "none";
-
-    panel.style.display =
-        isOpen ? "none" : "block";
-
-    button.setAttribute(
-        "aria-expanded",
-        String(!isOpen)
-    );
-
-    button.textContent =
-        isOpen
-            ? "💬 用户反馈"
-            : "✕ 收起反馈";
-}
-
-</script>
-<script>
-const SUPABASE_URL =
-    "https://vrirjvqozyjswpatshkp.supabase.co";
-
-const SUPABASE_ANON_KEY =
-    "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
-
-const WEBSITE_VERSION = "V1.3";
-
-
-/* =========================================================
-   初始化 Supabase
-   ========================================================= */
-
-if (!window.supabase || !window.supabase.createClient) {
-    throw new Error("Supabase SDK 未加载");
-}
-
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
-
-
 /* =========================================================
    提交反馈
    ========================================================= */
@@ -1091,35 +914,35 @@ async function submitFeedback(event) {
 
     try {
 
-        const { error } = await supabaseClient
-            .from("visitor_feedback")
-            .insert([
-                {
-                    name: name || null,
-                    relationship: relationship,
-                    device: device,
-                    content: content,
-                    website_version: WEBSITE_VERSION
-                }
-            ]);
+       if (!window.supabaseClient) {
+           throw new Error("Supabase 客户端未初始化，请检查网络或 Supabase SDK 加载情况。");
+       }
 
-
-        if (error) {
-
-            console.error(
-                "Supabase feedback insert error:",
-                error
-            );
-
-            status.textContent =
-                "提交失败：" +
-                (error.message || "请稍后再试。");
-
-            button.disabled = false;
-
-            return;
+       const { error } = await window.supabaseClient
+    .from("visitor_feedback")
+    .insert([
+        {
+            name: name || null,
+            relationship: relationship,
+            device: device,
+            content: content,
+            website_version: WEBSITE_VERSION
         }
+    ]);
 
+if (error) {
+    console.error(
+        "Supabase feedback insert error:",
+        error
+    );
+
+    status.textContent =
+        "提交失败：" +
+        (error.message || "请稍后再试。");
+
+    button.disabled = false;
+    return;
+}
 
         /* 提交成功 */
 
@@ -1206,7 +1029,6 @@ function toggleFeedback() {
 }
 
 </script>
-</script>
 
 
 </div>
@@ -1235,5 +1057,60 @@ function toggleFeedback() {
 </script>
 
 
+
+
+<script>
+/* =========================================================
+   Digital Twin — 每次进入网页时重置聊天记录
+   ========================================================= */
+(function () {
+    function resetDigitalTwinChat() {
+        const box = document.getElementById("messages");
+        if (!box) return;
+
+        // 清除当前页面中残留的聊天内容
+        box.innerHTML = "";
+
+        // 如果旧版本曾使用 localStorage / sessionStorage 保存聊天，
+        // 一并清除可能使用过的常见聊天键。
+        const possibleKeys = [
+            "digitalTwinMessages",
+            "digital-twin-messages",
+            "digital_twin_messages",
+            "chatHistory",
+            "chat_history",
+            "messages",
+            "digitalTwinChat",
+            "digital-twin-chat"
+        ];
+
+        possibleKeys.forEach(function (key) {
+            try {
+                localStorage.removeItem(key);
+            } catch (e) {}
+
+            try {
+                sessionStorage.removeItem(key);
+            } catch (e) {}
+        });
+
+        // 每次进入网页都显示全新的欢迎语
+        const welcome = document.createElement("div");
+        welcome.className = "msg bot";
+        welcome.textContent = "你好，我是蔡奇衡的数字分身。有什么想了解的吗？";
+        box.appendChild(welcome);
+    }
+
+    // DOM 已经加载时立即执行；否则等待加载完成。
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", resetDigitalTwinChat);
+    } else {
+        resetDigitalTwinChat();
+    }
+
+    // 暴露给其他代码使用，但不会保存聊天记录。
+    window.resetDigitalTwinChat = resetDigitalTwinChat;
+})();
+</script>
 
 </body></html>
