@@ -713,7 +713,8 @@ function openAboutPage(key){
 
   setTimeout(() => detail.scrollIntoView({behavior: "smooth", block: "start"}), 20);
 }
-
+</script>
+<script>
 function closeAboutPage(){
   const detail = document.getElementById("aboutDetailPage");
   const tabs = document.querySelector(".section-tabs");
@@ -833,14 +834,189 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+</script>
+
+
+<!-- Supabase SDK -->
+<script src="./index_files/supabase-js@2"></script>
+
+<script>
 
 // ===== Supabase Feedback =====
-// 请将下面两个值替换为你的 Supabase Project URL 和 anon/public key。
-// 不要把 service_role key 放进前端网页。
-src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-const SUPABASE_URL = "https://vrirjvqozyjswpatshkp.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
+
+const SUPABASE_URL =
+    "https://vrirjvqozyjswpatshkp.supabase.co";
+
+const SUPABASE_ANON_KEY =
+    "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
+
 const WEBSITE_VERSION = "V1.3";
+
+
+if (!window.supabase || !window.supabase.createClient) {
+    throw new Error("Supabase SDK 未加载");
+}
+
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+
+async function submitFeedback(event) {
+
+    event.preventDefault();
+
+    const name =
+        document.getElementById("feedbackName").value.trim();
+
+    const content =
+        document.getElementById("feedbackText").value.trim();
+
+    const relationship =
+        document.querySelector(
+            'input[name="relationship"]:checked'
+        )?.value || null;
+
+    const device =
+        document.querySelector(
+            'input[name="device"]:checked'
+        )?.value || null;
+
+    const status =
+        document.getElementById("feedbackStatus");
+
+    const button =
+        document.getElementById("feedbackSubmit");
+
+
+    if (!content) {
+        status.textContent = "请先填写反馈内容。";
+        return;
+    }
+
+    if (!relationship) {
+        status.textContent = "请选择你与主页主人的关系。";
+        return;
+    }
+
+    if (!device) {
+        status.textContent = "请选择本条反馈针对的设备。";
+        return;
+    }
+
+
+    button.disabled = true;
+    status.textContent = "正在提交……";
+
+
+    try {
+
+        const { error } = await supabaseClient
+            .from("visitor_feedback")
+            .insert([
+                {
+                    name: name || null,
+                    relationship: relationship,
+                    device: device,
+                    content: content,
+                    website_version: WEBSITE_VERSION
+                }
+            ]);
+
+
+        if (error) {
+            console.error(
+                "Supabase feedback insert error:",
+                error
+            );
+
+            status.textContent =
+                "提交失败：" +
+                (error.message || "请稍后再试。");
+
+            return;
+        }
+
+
+        document.getElementById("feedbackName").value = "";
+        document.getElementById("feedbackText").value = "";
+
+        document
+            .querySelectorAll(
+                'input[name="relationship"], input[name="device"]'
+            )
+            .forEach(function(input) {
+                input.checked = false;
+            });
+
+        status.textContent =
+            "✓ 感谢你的反馈！已经成功提交。";
+
+
+    } catch (error) {
+
+        console.error(
+            "Feedback Error:",
+            error
+        );
+
+        status.textContent =
+            "提交失败：" +
+            (error.message || "请稍后再试。");
+
+    } finally {
+
+        button.disabled = false;
+
+    }
+}
+
+
+function toggleFeedback() {
+
+    const panel =
+        document.getElementById("feedbackPanel");
+
+    const button =
+        document.getElementById("feedbackToggle");
+
+    if (!panel || !button) {
+        return;
+    }
+
+    const isOpen =
+        panel.style.display !== "none";
+
+    panel.style.display =
+        isOpen ? "none" : "block";
+
+    button.setAttribute(
+        "aria-expanded",
+        String(!isOpen)
+    );
+
+    button.textContent =
+        isOpen
+            ? "💬 用户反馈"
+            : "✕ 收起反馈";
+}
+
+</script>
+<script>
+const SUPABASE_URL =
+    "https://vrirjvqozyjswpatshkp.supabase.co";
+
+const SUPABASE_ANON_KEY =
+    "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
+
+const WEBSITE_VERSION = "V1.3";
+
+
+/* =========================================================
+   初始化 Supabase
+   ========================================================= */
 
 if (!window.supabase || !window.supabase.createClient) {
     throw new Error("Supabase SDK 未加载");
@@ -850,78 +1026,186 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
 );
-async function submitFeedback(event){
-  event.preventDefault();
 
-  const name = document.getElementById("feedbackName").value.trim();
-  const content = document.getElementById("feedbackText").value.trim();
-  const relationship = document.querySelector('input[name="relationship"]:checked')?.value || null;
-  const device = document.querySelector('input[name="device"]:checked')?.value || null;
-  const status = document.getElementById("feedbackStatus");
-  const button = document.getElementById("feedbackSubmit");
 
-  if (!content){
-    status.textContent = "请先填写反馈内容。";
-    return;
-  }
+/* =========================================================
+   提交反馈
+   ========================================================= */
 
-  if (!relationship){
-    status.textContent = "请选择你与主页主人的关系。";
-    return;
-  }
+async function submitFeedback(event) {
 
-  if (!device){
-    status.textContent = "请选择本条反馈针对的设备。";
-    return;
-  }
+    event.preventDefault();
 
-  if (!supabaseClient){
-    status.textContent = "还没有配置 Supabase，请先填写网页代码中的 SUPABASE_URL 和 SUPABASE_ANON_KEY。";
-    return;
-  }
+    const name =
+        document.getElementById("feedbackName").value.trim();
 
-  button.disabled = true;
-  status.textContent = "正在提交……";
+    const content =
+        document.getElementById("feedbackText").value.trim();
 
-  const { error } = await supabaseClient
-    .from("visitor_feedback")
-    .insert([{
-      name: name || null,
-      relationship,
-      device,
-      content,
-      website_version: WEBSITE_VERSION
-    }]);
+    const relationship =
+        document.querySelector(
+            'input[name="relationship"]:checked'
+        )?.value || null;
 
-  button.disabled = false;
+    const device =
+        document.querySelector(
+            'input[name="device"]:checked'
+        )?.value || null;
 
-  if (error){
-    console.error("Supabase feedback insert error:", error);
-    status.textContent = "提交失败：" + (error.message || "请稍后再试。");
-    return;
-  }
+    const status =
+        document.getElementById("feedbackStatus");
 
-  document.getElementById("feedbackName").value = "";
-  document.getElementById("feedbackText").value = "";
-  document.querySelectorAll('input[name="relationship"], input[name="device"]')
-    .forEach(input => input.checked = false);
+    const button =
+        document.getElementById("feedbackSubmit");
 
-  status.textContent = "✓ 感谢你的反馈！已经成功提交。";
+
+    /* 检查反馈内容 */
+
+    if (!content) {
+        status.textContent = "请先填写反馈内容。";
+        return;
+    }
+
+
+    /* 检查关系 */
+
+    if (!relationship) {
+        status.textContent = "请选择你与主页主人的关系。";
+        return;
+    }
+
+
+    /* 检查设备 */
+
+    if (!device) {
+        status.textContent = "请选择你使用的设备。";
+        return;
+    }
+
+
+    /* 开始提交 */
+
+    button.disabled = true;
+    status.textContent = "正在提交……";
+
+
+    try {
+
+        const { error } = await supabaseClient
+            .from("visitor_feedback")
+            .insert([
+                {
+                    name: name || null,
+                    relationship: relationship,
+                    device: device,
+                    content: content,
+                    website_version: WEBSITE_VERSION
+                }
+            ]);
+
+
+        if (error) {
+
+            console.error(
+                "Supabase feedback insert error:",
+                error
+            );
+
+            status.textContent =
+                "提交失败：" +
+                (error.message || "请稍后再试。");
+
+            button.disabled = false;
+
+            return;
+        }
+
+
+        /* 提交成功 */
+
+        document.getElementById("feedbackName").value = "";
+
+        document.getElementById("feedbackText").value = "";
+
+        document
+            .querySelectorAll(
+                'input[name="relationship"], input[name="device"]'
+            )
+            .forEach(function(input) {
+                input.checked = false;
+            });
+
+        status.textContent =
+            "✓ 感谢你的反馈！已经成功提交。";
+
+
+    } catch (error) {
+
+        console.error(
+            "Feedback Error:",
+            error
+        );
+
+        status.textContent =
+            "提交失败：" +
+            (error.message || "请稍后再试。");
+
+    } finally {
+
+        button.disabled = false;
+
+    }
 }
 
 
+/* =========================================================
+   打开 / 关闭反馈
+   ========================================================= */
 
-function toggleFeedback(){
-  const panel = document.getElementById("feedbackPanel");
-  const button = document.getElementById("feedbackToggle");
-  const isOpen = panel.style.display !== "none";
+function toggleFeedback() {
 
-  panel.style.display = isOpen ? "none" : "block";
-  button.setAttribute("aria-expanded", String(!isOpen));
-  button.textContent = isOpen ? "💬 用户反馈" : "✕ 收起反馈";
+    const panel =
+        document.getElementById("feedbackPanel");
+
+    const button =
+        document.getElementById("feedbackToggle");
+
+    if (!panel || !button) {
+        return;
+    }
+
+    const isOpen =
+        panel.style.display !== "none";
+
+
+    panel.style.display =
+        isOpen ? "none" : "block";
+
+
+    button.setAttribute(
+        "aria-expanded",
+        String(!isOpen)
+    );
+
+
+    button.textContent =
+        isOpen
+            ? "💬 用户反馈"
+            : "✕ 收起反馈";
+
+
+    if (!isOpen) {
+
+        panel.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
 
 }
 
+</script>
 </script>
 
 
