@@ -841,11 +841,17 @@ const SUPABASE_URL = "https://vrirjvqozyjswpatshkp.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
 const WEBSITE_VERSION = "V1.3";
 
-const supabaseClient =
-  (SUPABASE_URL !== "YOUR_SUPABASE_URL" && SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY")
-  ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
+let supabaseClient = null;
 
+if (
+    SUPABASE_URL !== "YOUR_SUPABASE_URL" &&
+    SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY"
+) {
+    supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+}
 async function submitFeedback(event){
   event.preventDefault();
 
