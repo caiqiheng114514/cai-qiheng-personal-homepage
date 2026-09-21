@@ -811,17 +811,17 @@ async function send() {
 
     } catch (error) {
 
-        console.error("AI Chat Error:", error);
+    console.error("AI Chat Error:", error);
 
-        const loadingElement =
-            document.getElementById(loadingId);
+    const loadingElement =
+        document.getElementById(loadingId);
 
-        if (loadingElement) {
-            loadingElement.innerHTML =
-                "哎，好像和我的 AI 后端失联了 😵<br>请稍后再试。";
-        }
+    if (loadingElement) {
+        loadingElement.innerHTML =
+            "错误信息：<br>" +
+            escapeHtml(error?.message || String(error));
     }
-
+}
     box.scrollTop = box.scrollHeight;
 }
 
