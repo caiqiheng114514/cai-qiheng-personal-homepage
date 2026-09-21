@@ -843,10 +843,7 @@ const WEBSITE_VERSION = "V1.3";
 
 let supabaseClient = null;
 
-if (
-    SUPABASE_URL !== "YOUR_SUPABASE_URL" &&
-    SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY"
-) {
+if (window.supabase) {
     supabaseClient = window.supabase.createClient(
         SUPABASE_URL,
         SUPABASE_ANON_KEY
