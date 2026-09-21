@@ -160,6 +160,7 @@ button{border:0;background:#333;color:white;border-radius:20px;padding:0 25px;cu
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://vrirjvqozyjswpatshkp.supabase.co";
+const SUPABASE_FUNCTION_URL = SUPABASE_URL + "/functions/v1/digital-twin";
 const SUPABASE_ANON_KEY = "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
 const WEBSITE_VERSION = "V1.3";
 
@@ -749,8 +750,9 @@ async function send() {
     const input = document.getElementById("input");
     const box = document.getElementById("messages");
 
-    const text = input.value.trim();
+    if (!input || !box) return;
 
+    const text = input.value.trim();
     if (!text) return;
 
     // 显示用户消息
@@ -774,9 +776,8 @@ async function send() {
     box.scrollTop = box.scrollHeight;
 
     try {
-        // 获取之前的聊天记录
+        // 获取当前页面中的聊天记录
         const history = [];
-
         const messageElements = box.querySelectorAll(".msg");
 
         messageElements.forEach((element) => {
@@ -787,9 +788,7 @@ async function send() {
                     role: "user",
                     content: element.innerText
                 });
-            }
-
-            if (element.classList.contains("bot")) {
+            } else if (element.classList.contains("bot")) {
                 history.push({
                     role: "assistant",
                     content: element.innerText
@@ -797,22 +796,47 @@ async function send() {
             }
         });
 
-        // 调用 Supabase Edge Function
-       const { data, error } =
-    await window.supabaseClient.functions.invoke(
-        "digital-twin",
-        {
-            body: {
+        // 直接请求 Supabase Edge Function。
+        // 这样可以绕开 supabase-js 的 functions.invoke 封装，
+        // 同时在手机端显示更明确的 HTTP / 网络错误。
+        const functionUrl = SUPABASE_FUNCTION_URL;
+
+        const response = await fetch(functionUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": "Bearer " + SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify({
                 messages: history
-            }
+            })
+        });
+
+        let data = null;
+        const responseText = await response.text();
+
+        try {
+            data = responseText ? JSON.parse(responseText) : null;
+        } catch (parseError) {
+            data = null;
         }
-    );
-        if (error) {
-            throw error;
+
+        if (!response.ok) {
+            const serverMessage =
+                data?.error ||
+                data?.message ||
+                responseText ||
+                ("HTTP " + response.status);
+
+            throw new Error(
+                "Edge Function 请求失败：" + serverMessage
+            );
         }
 
         const reply =
             data?.reply ||
+            data?.message ||
             "数字分身暂时没有收到有效回复。";
 
         // 替换“正在思考...”
@@ -820,22 +844,36 @@ async function send() {
             document.getElementById(loadingId);
 
         if (loadingElement) {
-            loadingElement.innerHTML = escapeHtml(reply);
+            loadingElement.innerHTML = escapeHtml(String(reply));
         }
 
     } catch (error) {
+        console.error("AI Chat Error:", error);
 
-    console.error("AI Chat Error:", error);
+        const loadingElement =
+            document.getElementById(loadingId);
 
-    const loadingElement =
-        document.getElementById(loadingId);
+        let message = error?.message || String(error);
 
-    if (loadingElement) {
-        loadingElement.innerHTML =
-            "错误信息：<br>" +
-            escapeHtml(error?.message || String(error));
+        // fetch 网络错误通常没有 HTTP 状态码，
+        // 给手机端一个更容易判断原因的提示。
+        if (
+            message === "Failed to fetch" ||
+            message === "Load failed" ||
+            message === "NetworkError when attempting to fetch resource."
+        ) {
+            message =
+                "无法连接数字分身服务器。请检查手机网络；" +
+                "如果电脑端正常而手机端仍失败，下一步需要检查 Edge Function 的 CORS 设置。";
+        }
+
+        if (loadingElement) {
+            loadingElement.innerHTML =
+                "提交失败：<br>" +
+                escapeHtml(message);
+        }
     }
-}
+
     box.scrollTop = box.scrollHeight;
 }
 
@@ -1110,6 +1148,13 @@ function toggleFeedback() {
 
     // 暴露给其他代码使用，但不会保存聊天记录。
     window.resetDigitalTwinChat = resetDigitalTwinChat;
+
+    // 从浏览器历史返回页面时也重新开始一段新对话。
+    window.addEventListener("pageshow", function (event) {
+        if (event.persisted) {
+            resetDigitalTwinChat();
+        }
+    });
 })();
 </script>
 
