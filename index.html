@@ -837,18 +837,19 @@ function escapeHtml(text) {
 // ===== Supabase Feedback =====
 // 请将下面两个值替换为你的 Supabase Project URL 和 anon/public key。
 // 不要把 service_role key 放进前端网页。
+src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
 const SUPABASE_URL = "https://vrirjvqozyjswpatshkp.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_uJQd9MPaTeGKpjhUWetdcA_qPuGNa3b";
 const WEBSITE_VERSION = "V1.3";
 
-let supabaseClient = null;
-
-if (window.supabase) {
-    supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-    );
+if (!window.supabase || !window.supabase.createClient) {
+    throw new Error("Supabase SDK 未加载");
 }
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
 async function submitFeedback(event){
   event.preventDefault();
 
