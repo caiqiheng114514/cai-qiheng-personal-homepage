@@ -243,6 +243,119 @@ button{border:0;background:#333;color:white;border-radius:20px;padding:0 25px;cu
 }
 </style>
 
+
+<style>
+/* ===== 兴趣板块：篮球 / CS2 / 三角洲 / Valorant ===== */
+.interest-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  margin-top:28px;
+}
+.interest-card{
+  min-height:150px;
+  padding:22px;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:20px;
+  background:#fafafa;
+  box-shadow:0 5px 14px rgba(0,0,0,.05);
+  transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+}
+.interest-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 22px rgba(0,0,0,.09);
+  background:#fff;
+}
+.interest-card-icon{
+  font-size:30px;
+  line-height:1;
+  margin-bottom:14px;
+}
+.interest-card-title{
+  font-size:19px;
+  font-weight:700;
+  color:#222;
+  margin-bottom:8px;
+}
+.interest-card-text{
+  font-size:14px;
+  line-height:1.65;
+  color:#777;
+}
+@media(max-width:600px){
+  .interest-grid{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .interest-card{
+    min-height:125px;
+    padding:18px;
+  }
+}
+</style>
+
+
+
+
+
+
+
+
+
+
+
+<style id="interest-final-css">
+.interest-card{cursor:pointer !important;position:relative}
+.interest-card::after{
+  content:"点击查看 →";
+  display:block;
+  margin-top:10px;
+  font-size:12px;
+  color:#999;
+}
+.interest-detail-page{
+  display:none;
+  width:100%;
+  box-sizing:border-box;
+  margin:24px 0;
+  padding:30px;
+  background:#fff;
+  border-radius:30px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+.interest-detail-page.active{display:block !important}
+.interest-detail-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  padding-bottom:20px;
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+.interest-detail-title{margin:0;font-size:28px;color:#222}
+.interest-detail-kicker{font-size:13px;color:#888;margin-bottom:6px}
+.interest-detail-exit{
+  border:0;border-radius:12px;padding:10px 17px;
+  background:#f1f1f1;color:#333;font-weight:700;cursor:pointer
+}
+.interest-detail-body{padding-top:28px}
+.interest-open-row{
+  margin-top:20px;padding:18px 20px;border-radius:16px;
+  background:#f7f7f7;border:1px solid rgba(0,0,0,.06);
+  cursor:pointer;font-weight:700;
+}
+.interest-open-row .symbol{float:right;font-size:20px}
+.interest-more{
+  display:none;margin-top:10px;padding:18px 20px;
+  border-radius:16px;background:#fafafa;color:#666;line-height:1.8;
+}
+.interest-more.open{display:block}
+@media(max-width:600px){
+  .interest-detail-page{padding:22px;border-radius:24px}
+  .interest-detail-title{font-size:22px}
+}
+</style>
+
 </head><body><div class="feedback-toggle-wrap">
   <button id="contactToggle" class="feedback-toggle contact-toggle" type="button" onclick="toggleContact()" aria-expanded="false" aria-controls="contactPanel">
     ✉️ 联系方式
@@ -956,8 +1069,34 @@ const aboutDetails = {
   "🎮 兴趣": {
     title: "🎮 兴趣",
     content: `
-      <div class="detail-main-text">篮球 / CS2 / 三角洲 / Valorant</div>
-      <div class="detail-placeholder">这里是兴趣内容区域，后续可以添加喜欢的球队、游戏经历、截图或其他内容。</div>
+      <div class="detail-main-text">我的兴趣</div>
+      <div class="detail-sub-text">这里分为四个板块：篮球、CS2、三角洲、Valorant。</div>
+
+      <div class="interest-grid">
+        <div class="interest-card">
+          <div class="interest-card-icon">🏀</div>
+          <div class="interest-card-title">篮球</div>
+          <div class="interest-card-text">篮球兴趣板块，后续可以添加喜欢的球队、球员、比赛记录等内容。</div>
+        </div>
+
+        <div class="interest-card">
+          <div class="interest-card-icon">🔫</div>
+          <div class="interest-card-title">CS2</div>
+          <div class="interest-card-text">CS2 兴趣板块，后续可以添加游戏经历、常用枪械、精彩时刻等内容。</div>
+        </div>
+
+        <div class="interest-card">
+          <div class="interest-card-icon">🎯</div>
+          <div class="interest-card-title">三角洲</div>
+          <div class="interest-card-text">三角洲兴趣板块，后续可以添加游戏模式、干员偏好、游戏记录等内容。</div>
+        </div>
+
+        <div class="interest-card">
+          <div class="interest-card-icon">⚡</div>
+          <div class="interest-card-title">Valorant</div>
+          <div class="interest-card-text">Valorant 兴趣板块，后续可以添加常玩特工、地图偏好、精彩操作等内容。</div>
+        </div>
+      </div>
     `
   },
   "✨ 特点": {
@@ -1504,5 +1643,131 @@ function toggleFeedback() {
   }
 }
 </style>
+
+
+<div id="interestDetailPage" class="interest-detail-page" aria-hidden="true">
+  <div class="interest-detail-top">
+    <div>
+      <div id="interestDetailKicker" class="interest-detail-kicker">兴趣</div>
+      <h2 id="interestDetailTitle" class="interest-detail-title"></h2>
+    </div>
+    <button class="interest-detail-exit" type="button" onclick="closeInterestDetail()">← 退出</button>
+  </div>
+  <div id="interestDetailContent" class="interest-detail-content"></div>
+</div>
+
+
+
+
+
+
+
+
+<div id="interestFinalDetail" class="interest-detail-page" aria-hidden="true">
+  <div class="interest-detail-top">
+    <div>
+      <div id="interestFinalKicker" class="interest-detail-kicker"></div>
+      <h2 id="interestFinalTitle" class="interest-detail-title"></h2>
+    </div>
+    <button id="interestFinalClose" class="interest-detail-exit" type="button">← 退出</button>
+  </div>
+  <div id="interestFinalBody" class="interest-detail-body"></div>
+</div>
+
+
+<script id="interest-final-script">
+(function(){
+  var data = {
+    basketball:{
+      kicker:"兴趣 · 01", title:"🏀 篮球",
+      intro:"篮球是我的兴趣之一。",
+      rows:[
+        ["🏀 篮球详情","这里可以填写喜欢的球队、球员、比赛以及自己的篮球经历。"],
+        ["📋 个人记录","这里可以记录比赛、训练、精彩瞬间或者以后想补充的篮球内容。"]
+      ]
+    },
+    cs2:{
+      kicker:"兴趣 · 02", title:"🔫 CS2",
+      intro:"CS2 是我喜欢的 FPS 游戏之一。",
+      rows:[
+        ["🔫 游戏内容","这里可以填写喜欢的地图、枪械、模式、段位以及游戏习惯。"],
+        ["🔥 精彩时刻","这里可以放自己的精彩操作、比赛记录、截图或视频链接。"]
+      ]
+    },
+    delta:{
+      kicker:"兴趣 · 03", title:"🎯 三角洲",
+      intro:"三角洲也是我平时会玩的 FPS 游戏。",
+      rows:[
+        ["🎯 游戏偏好","这里可以填写喜欢的模式、干员、装备搭配以及常用玩法。"],
+        ["📋 游戏记录","这里可以记录自己的游戏经历、战绩和以后想展示的内容。"]
+      ]
+    },
+    valorant:{
+      kicker:"兴趣 · 04", title:"⚡ Valorant",
+      intro:"Valorant 是我喜欢的另一款 FPS 游戏。",
+      rows:[
+        ["⚡ 常玩内容","这里可以填写常玩的特工、地图、位置以及自己的游戏习惯。"],
+        ["🔥 精彩操作","这里可以放精彩操作、比赛记录、截图或视频链接。"]
+      ]
+    }
+  };
+
+  function findCard(target){
+    while(target && target !== document){
+      if(target.classList && target.classList.contains("interest-card")) return target;
+      target = target.parentNode;
+    }
+    return null;
+  }
+
+  document.addEventListener("click", function(e){
+    var card = findCard(e.target);
+    if(card){
+      var title = card.querySelector(".interest-card-title");
+      if(!title) return;
+      var text = title.textContent.trim();
+      var key = text === "篮球" ? "basketball" :
+                text === "CS2" ? "cs2" :
+                text === "三角洲" ? "delta" :
+                text === "Valorant" ? "valorant" : null;
+      if(!key || !data[key]) return;
+
+      var d=data[key];
+      var page=document.getElementById("interestFinalDetail");
+      document.getElementById("interestFinalKicker").textContent=d.kicker;
+      document.getElementById("interestFinalTitle").textContent=d.title;
+
+      var body='<div style="font-size:17px;line-height:1.8;color:#444">'+d.intro+'</div>';
+      for(var i=0;i<d.rows.length;i++){
+        body += '<div class="interest-open-row"><span>'+d.rows[i][0]+'</span><span class="symbol">＋</span></div>';
+        body += '<div class="interest-more">'+d.rows[i][1]+'</div>';
+      }
+      document.getElementById("interestFinalBody").innerHTML=body;
+
+      page.classList.add("active");
+      page.setAttribute("aria-hidden","false");
+      setTimeout(function(){page.scrollIntoView({behavior:"smooth",block:"start"});},30);
+      return;
+    }
+
+    if(e.target.id === "interestFinalClose"){
+      var page=document.getElementById("interestFinalDetail");
+      page.classList.remove("active");
+      page.setAttribute("aria-hidden","true");
+      return;
+    }
+
+    var row=e.target.closest ? e.target.closest(".interest-open-row") : null;
+    if(row){
+      var more=row.nextElementSibling;
+      if(more && more.classList.contains("interest-more")){
+        var opened=more.classList.toggle("open");
+        var symbol=row.querySelector(".symbol");
+        if(symbol) symbol.textContent=opened ? "−" : "＋";
+      }
+    }
+  });
+})();
+</script>
 
 </body></html>
